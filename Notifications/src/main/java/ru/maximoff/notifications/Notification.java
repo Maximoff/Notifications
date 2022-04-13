@@ -16,18 +16,44 @@ import android.os.Build;
 import ru.maximoff.notifications.R;
 
 public class Notification {
-	private static final int NOT_ID = 1001;
+	private int NOT_ID = 1001;
+	private Activity activity;
+	private NotificationManager notificationManager;
 
-	public static void sendNotification(Activity act, String header, String text, int ledColor) {
+	public Notification(Activity act) {
+		activity = act;
+		notificationManager = (NotificationManager) act.getSystemService(Context.NOTIFICATION_SERVICE);
+	}
+
+	public void setId(int id) {
+		NOT_ID = id;
+	}
+
+	public void cancel() {
+		notificationManager.cancel(NOT_ID);
+	}
+
+	public int getId() {
+		return NOT_ID;
+	}
+
+	public void sendNotification(String header, String text) {
+		sendNotification(header, text, Color.BLUE, false);
+	}
+
+	public void sendNotification(String header, String text, int ledColor) {
+		sendNotification(header, text, ledColor, false);
+	}
+
+	public void sendNotification(String header, String text, int ledColor, boolean ongoing) {
 		Uri sound = null;
 		try {
-			sound = Uri.parse("android.resource://" + act.getPackageName() + "/" + R.raw.done);  
+			sound = Uri.parse("android.resource://" + activity.getPackageName() + "/" + R.raw.done);  
 		} catch (Exception e) {
 			sound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 		}
-		final NotificationManager notificationManager = (NotificationManager) act.getSystemService(Context.NOTIFICATION_SERVICE);
 		final String channelId = "channel-" + NOT_ID;
-		final String channelName = act.getString(R.string.channel_test);
+		final String channelName = activity.getString(R.string.channel_test);
 
 		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 			NotificationChannel mChannel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH);
@@ -44,16 +70,17 @@ public class Notification {
 			notificationManager.createNotificationChannel(mChannel);
 		}
 
-		Intent intent = new Intent(act, act.getClass());
+		Intent intent = new Intent(activity, activity.getClass());
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-		PendingIntent pendingIntent = PendingIntent.getActivity(act, 0, intent, 0);
-		Notification.Builder notBuilder = new Notification.Builder(act, channelId);
+		PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
+		Notification.Builder notBuilder = new Notification.Builder(activity, channelId);
         notBuilder.setTicker(header)
             .setContentTitle(header)
             .setContentText(text)
 			.setWhen(System.currentTimeMillis())
 			.setShowWhen(true)
-			.setLargeIcon(BitmapFactory.decodeResource(act.getResources(), R.drawable.notification))
+			.setOngoing(ongoing)
+			.setLargeIcon(BitmapFactory.decodeResource(activity.getResources(), R.drawable.notification))
             .setSmallIcon(R.drawable.notification)
 			.setContentIntent(pendingIntent);
 		Notification notification = notBuilder.build();
@@ -66,7 +93,6 @@ public class Notification {
 		} else {
 			notification.defaults = Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
 		}
-
 		notification.flags = notification.flags | Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL;
 		notificationManager.notify(NOT_ID, notification);
 	}

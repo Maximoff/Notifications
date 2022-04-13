@@ -17,6 +17,7 @@ import ru.maximoff.notifications.R;
 
 public class Notification {
 	private int NOT_ID = 1001;
+	private int color = Color.BLUE;
 	private Activity activity;
 	private NotificationManager notificationManager;
 
@@ -36,13 +37,25 @@ public class Notification {
 	public int getId() {
 		return NOT_ID;
 	}
+	
+	public void setColor(int c) {
+		color = c;
+	}
+	
+	public int getColor() {
+		return color;
+	}
 
 	public void sendNotification(String header, String text) {
-		sendNotification(header, text, Color.BLUE, false);
+		sendNotification(header, text, color, false);
 	}
 
 	public void sendNotification(String header, String text, int ledColor) {
 		sendNotification(header, text, ledColor, false);
+	}
+	
+	public void sendNotification(String header, String text, boolean ongoing) {
+		sendNotification(header, text, color, ongoing);
 	}
 
 	public void sendNotification(String header, String text, int ledColor, boolean ongoing) {
@@ -93,7 +106,10 @@ public class Notification {
 		} else {
 			notification.defaults = Notification.DEFAULT_SOUND | Notification.DEFAULT_VIBRATE;
 		}
-		notification.flags = notification.flags | Notification.FLAG_SHOW_LIGHTS | Notification.FLAG_AUTO_CANCEL;
+		notification.flags = notification.flags | Notification.FLAG_SHOW_LIGHTS;
+		if (!ongoing) {
+			notification.flags |= Notification.FLAG_AUTO_CANCEL;
+		}
 		notificationManager.notify(NOT_ID, notification);
 	}
 }

@@ -86,7 +86,12 @@ public class Notification {
 		Intent intent = new Intent(activity, activity.getClass());
 		intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
 		PendingIntent pendingIntent = PendingIntent.getActivity(activity, 0, intent, 0);
-		Notification.Builder notBuilder = new Notification.Builder(activity, channelId);
+		Notification.Builder notBuilder;
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+			notBuilder = new Notification.Builder(activity, channelId);
+		} else {
+			notBuilder = new Notification.Builder(activity);
+		}
         notBuilder.setTicker(header)
             .setContentTitle(header)
             .setContentText(text)
